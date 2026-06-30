@@ -1,97 +1,61 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 🧠 Aplicativo de Controle - Jogo Genius (STM32)
 
-# Getting Started
+Este repositório contém o aplicativo mobile desenvolvido em **React Native (Bare Workflow)** para atuar como um painel de controle, histórico e ranking para um jogo Genius físico, processado por um microcontrolador **STM32**.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Funcionalidades Implementadas
 
-## Step 1: Start Metro
+A interface e a lógica base do aplicativo já estão estruturadas:
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+* **Dashboard:** Painel principal que exibe o jogador atual, o round em andamento na STM32 e permite ligar/desligar o buzzer da placa física.
+* **Modo Host:** Interface visual com os 4 botões coloridos do Genius, permitindo que um jogador crie uma sequência personalizada e envie para a placa reproduzir.
+* **Ranking/Histórico:** Tela que utiliza `AsyncStorage` para salvar os resultados das partidas localmente no celular (Nome, Data/Hora, Dificuldade, Round atingido e Status de Vitória/Derrota).
+* **Serviço Bluetooth:** Implementação da biblioteca `react-native-bluetooth-classic` com lógica preparada para pareamento via protocolo SPP com módulos HC-05.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## Arquitetura do Projeto
 
-```sh
-# Using npm
-npm start
+O projeto adota uma arquitetura modular baseada em **Custom Hooks**, separando estritamente a Interface Visual (Views), Lógica de Negócios (Hooks) e Estilização (Styles).
 
-# OR using Yarn
-yarn start
-```
+src/
+├── navigation/    # Configuração de rotas (React Navigation)
+├── screens/       # Telas divididas em (index.tsx, styles.ts, use[Tela].ts)
+├── services/      # Comunicação externa (BluetoothService e StorageService)
+├── store/         # Gerenciamento de estado global (Zustand)
+└── utils/         # Tipagens (types.ts)
 
-## Step 2: Build and run your app
+## 📡 Protocolo de Comunicação UART (Bluetooth)
+O aplicativo foi projetado para ler e escrever comandos em string finalizados com o caractere de quebra de linha \n.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+- Recebimento (STM32 ➔ App)
+O aplicativo escuta continuamente o fluxo de dados e reage aos seguintes comandos:
 
-### Android
+$NOME:NOME_JOGADOR - Registra o jogador atual.
 
-```sh
-# Using npm
-npm run android
+$ROUND:X - Atualiza o display do round atual.
 
-# OR using Yarn
-yarn android
-```
+$RESULTADO:NOME:NIVEL:STATUS - Registra o fim de jogo no histórico.
 
-### iOS
+$ERRO:MOTIVO - Registra uma falha (timeout, cor errada).
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+- Envio (App ➔ STM32)
+O aplicativo despacha os seguintes comandos via botões na interface:
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+$MUTE:0 ou $MUTE:1 - Controle do buzzer.
 
-```sh
-bundle install
-```
+$HOST_MODE - Prepara a placa para receber uma sequência.
 
-Then, and every time you update your native dependencies, run:
+$SEQ:C1,C2,C3... - Envia a sequência de IDs de cores criada no app.
 
-```sh
-bundle exec pod install
-```
+## Como executar o projeto localmente
+Como o projeto utiliza código nativo para a conexão Bluetooth Classic, ele não pode ser executado via Expo Go.
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+Certifique-se de ter o ambiente Android configurado (JDK, Android SDK). Link: https://developer.android.com/studio?hl=pt-br (pode clicar em next em tudo e só rezar pelo melhor)
 
-```sh
-# Using npm
-npm run ios
+Clone o repositório.
 
-# OR using Yarn
-yarn ios
-```
+Instale as dependências: npm install
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+Conecte o seu smartphone Android via cabo USB (com Depuração USB ativa).
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+Execute o servidor do Metro Bundler: npm start
 
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Em outro terminal, compile o app: npm run android
