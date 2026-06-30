@@ -15,12 +15,14 @@ A interface e a lógica base do aplicativo já estão estruturadas:
 
 O projeto adota uma arquitetura modular baseada em **Custom Hooks**, separando estritamente a Interface Visual (Views), Lógica de Negócios (Hooks) e Estilização (Styles).
 
+```text
 src/
 ├── navigation/    # Configuração de rotas (React Navigation)
 ├── screens/       # Telas divididas em (index.tsx, styles.ts, use[Tela].ts)
 ├── services/      # Comunicação externa (BluetoothService e StorageService)
 ├── store/         # Gerenciamento de estado global (Zustand)
 └── utils/         # Tipagens (types.ts)
+```
 
 ## 📡 Protocolo de Comunicação UART (Bluetooth)
 O aplicativo foi projetado para ler e escrever comandos em string finalizados com o caractere de quebra de linha \n.
