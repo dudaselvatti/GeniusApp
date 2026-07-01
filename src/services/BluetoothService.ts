@@ -1,3 +1,4 @@
+import { PermissionsAndroid, Platform } from 'react-native';
 import RNBluetoothClassic, {
   BluetoothDevice,
   BluetoothEventSubscription,
@@ -8,6 +9,31 @@ class BluetoothService {
   private connectedDevice: BluetoothDevice | null = null;
   private readSubscription: BluetoothEventSubscription | null = null;
   private dataBuffer: string = ''; // Buffer para acumular os dados recebidos
+
+  async requestBluetoothPermissions(): Promise<boolean> {
+    if (Platform.OS === 'android') {
+      // Se for Android 12 ou superior
+      if (Platform.Version >= 31) {
+        const result = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+          PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+        ]);
+
+        return (
+          result['android.permission.BLUETOOTH_CONNECT'] === PermissionsAndroid.RESULTS.GRANTED &&
+          result['android.permission.BLUETOOTH_SCAN'] === PermissionsAndroid.RESULTS.GRANTED
+        );
+      } 
+      // Se for Android 11 ou inferior (exige permissão de localização para o Bluetooth)
+      else {
+        const result = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+        );
+        return result === PermissionsAndroid.RESULTS.GRANTED;
+      }
+    }
+    return true;
+  }
 
   // 1. Verificar se o Bluetooth está ativado no celular
   async checkBluetoothEnabled(): Promise<boolean> {
