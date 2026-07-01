@@ -12,6 +12,16 @@ export function useBluetooth() {
 
   const scanDevices = async () => {
     setIsScanning(true);
+
+    // 1. PRIMEIRO PASSO: Pedir a permissão na tela do usuário
+    const hasPermission = await btService.requestBluetoothPermissions();
+    if (!hasPermission) {
+      Alert.alert('Permissão Negada', 'O aplicativo precisa de permissão para buscar a placa.');
+      setIsScanning(false);
+      return;
+    }
+
+    // 2. Checa se o Bluetooth do celular está ligado
     const enabled = await btService.checkBluetoothEnabled();
     if (!enabled) {
       Alert.alert('Erro', 'Por favor, ative o Bluetooth do celular.');
@@ -19,7 +29,7 @@ export function useBluetooth() {
       return;
     }
 
-    // Busca os dispositivos pareados (o HC-05 deve estar pareado nas configs do Android)
+    // 3. Só depois de tudo autorizado, busca os dispositivos!
     const paired = await btService.getPairedDevices();
     setDevices(paired);
     setIsScanning(false);

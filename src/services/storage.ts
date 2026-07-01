@@ -1,46 +1,59 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import firestore from '@react-native-firebase/firestore';
 import { GameResult } from '../utils/types';
 
-const RANKING_KEY = '@genius_ranking';
+// Referência direta à coleção que você criou no painel do Firebase
+const rankingCollection = firestore().collection('RankingGlobal');
 
 export const StorageService = {
-  // Salvar um novo resultado
+  // 1. Salvar resultado na Nuvem
   async saveResult(result: Omit<GameResult, 'id' | 'timestamp'>): Promise<void> {
     try {
-      // Cria o registro completo com o momento exato do término da partida
+      const newId = Date.now().toString();
       const newResult: GameResult = {
         ...result,
-        id: Date.now().toString(),
+        id: newId,
         timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
       };
 
-      // Pega o ranking atual
-      const existing = await this.getResults();
-      const updated = [newResult, ...existing]; // Adiciona o mais recente no topo
-
-      await AsyncStorage.setItem(RANKING_KEY, JSON.stringify(updated));
+      // Grava no Firebase usando o ID gerado como nome do documento
+      await rankingCollection.doc(newId).set(newResult);
+      console.log('Resultado salvo na nuvem com sucesso!');
     } catch (error) {
-      console.error('Erro ao salvar resultado no storage:', error);
+      console.error('Erro ao salvar no Firebase:', error);
     }
   },
 
-  // Obter todos os resultados salvos
+  // 2. Buscar resultados da Nuvem
   async getResults(): Promise<GameResult[]> {
     try {
-      const data = await AsyncStorage.getItem(RANKING_KEY);
-      return data ? JSON.parse(data) : [];
+      // Busca os dados ordenados pelo ID (que é um Timestamp), do maior para o menor (desc)
+      const snapshot = await rankingCollection.orderBy('id', 'desc').get();
+      
+      const results: GameResult[] = [];
+      snapshot.forEach(doc => {
+        results.push(doc.data() as GameResult);
+      });
+      
+      return results;
     } catch (error) {
-      console.error('Erro ao ler resultados do storage:', error);
+      console.error('Erro ao buscar do Firebase:', error);
       return [];
     }
   },
 
-  // Limpar histórico
+  // 3. Limpar histórico (Apenas para fins de teste)
   async clearResults(): Promise<void> {
     try {
-      await AsyncStorage.removeItem(RANKING_KEY);
+      const snapshot = await rankingCollection.get();
+      // O Firebase exige deletar um documento por vez
+      const batch = firestore().batch();
+      snapshot.forEach(doc => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
+      console.log('Banco de dados limpo com sucesso.');
     } catch (error) {
-      console.error('Erro ao limpar storage:', error);
+      console.error('Erro ao limpar Firebase:', error);
     }
   }
 };
