@@ -11,6 +11,7 @@ interface GameState {
   toggleMute: () => void;
   setConnectionStatus: (status: boolean) => void;
   setGameActive: (active: boolean) => void;
+  setIsMuted: (muted: boolean) => void;
 }
 
 export const useGameStore = create<GameState>((set) => ({
@@ -24,4 +25,5 @@ export const useGameStore = create<GameState>((set) => ({
   toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
   setConnectionStatus: (status) => set({ isConnected: status }),
   setGameActive: (active) => set({ gameActive: active }),
+  setIsMuted: (muted) => set({ isMuted: muted }),
 }));

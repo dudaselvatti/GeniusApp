@@ -221,6 +221,15 @@ class BluetoothService {
     else if (command.startsWith('$ERRO:')) {
       console.log('Erro recebido da placa:', command);
     }
+    // Regra: $MUTE:STATUS
+    else if (command.startsWith('$MUTE:')) {
+      const status = command.split(':')[1];
+      if (status === '1') {
+        store.setIsMuted(true);
+      } else {
+        store.setIsMuted(false);
+      }
+    }
   }
 }
 
