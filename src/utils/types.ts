@@ -1,8 +1,8 @@
 export interface GameResult {
-  id: string; // Para garantir unicidade (ex: timestamp)
+  id: string;
   playerName: string;
-  timestamp: string; // Hora exata em que o resultado foi gerado
+  timestamp: string; // Data e hora: "01/07 14:32"
   difficulty: string;
-  round: string; // Ex: "3/5"
+  round: string;
   status: 'VITORIA' | 'DERROTA';
 }

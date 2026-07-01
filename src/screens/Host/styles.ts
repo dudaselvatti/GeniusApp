@@ -1,94 +1,127 @@
 import { StyleSheet, Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window');
-const BUTTON_SIZE = (width / 2) - 40; // Calcula o tamanho para caber 2 por linha com folga
+const BUTTON_SIZE = (width / 2) - 44;
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212', // Fundo escuro igual ao Dashboard
+    backgroundColor: '#0A0A0F',
     alignItems: 'center',
-    paddingTop: 40,
+    paddingTop: 32,
+    paddingHorizontal: 24,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
-    paddingHorizontal: 20,
+    marginBottom: 36,
+    width: '100%',
   },
   title: {
-    color: '#FFF',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: '900',
+    letterSpacing: 4,
+    marginBottom: 6,
+  },
+  subtitle: {
+    color: '#444',
+    fontSize: 11,
+    letterSpacing: 3,
+    fontWeight: '600',
+    marginBottom: 20,
   },
   sequenceDisplay: {
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#111118',
     width: '100%',
-    minHeight: 60,
-    borderRadius: 10,
+    minHeight: 80,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: '#1E1E30',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 10,
-    marginTop: 15,
+    padding: 12,
+  },
+  sequenceDisplayLocked: {
+    borderColor: '#F9A82544',
+    backgroundColor: '#1A160A',
+  },
+  waitingContainer: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  waitingText: {
+    color: '#F9A825',
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: 2,
+  },
+  waitingSubText: {
+    color: '#7A6000',
+    fontSize: 11,
+    letterSpacing: 1,
   },
   sequenceText: {
-    color: '#00E676',
-    fontSize: 20,
-    letterSpacing: 4, // Espaçamento entre os números
-    fontWeight: 'bold',
+    color: '#00C853',
+    fontSize: 18,
+    letterSpacing: 6,
+    fontWeight: '800',
   },
   placeholderText: {
-    color: '#555',
-    fontSize: 16,
+    color: '#2A2A3A',
+    fontSize: 14,
     fontStyle: 'italic',
+    letterSpacing: 1,
   },
   grid: {
     width: '100%',
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    gap: 20, // Espaço entre os botões
-    paddingHorizontal: 20,
+    gap: 18,
   },
   colorButton: {
     width: BUTTON_SIZE,
     height: BUTTON_SIZE,
-    borderRadius: 20,
-    elevation: 8, // Sombra no Android
-    shadowColor: '#000', // Sombra no iOS
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
+    borderRadius: 24,
+    elevation: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
   },
   actionsContainer: {
     flexDirection: 'row',
-    gap: 15,
-    marginTop: 50,
+    gap: 14,
+    marginTop: 44,
+    width: '100%',
   },
   btnAction: {
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 12,
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: 140,
   },
   btnClear: {
-    backgroundColor: '#333',
+    backgroundColor: '#111118',
+    borderWidth: 1,
+    borderColor: '#1E1E30',
   },
   btnSend: {
-    backgroundColor: '#00E676',
+    backgroundColor: '#0D1F0D',
+    borderWidth: 1,
+    borderColor: '#00C853',
   },
   btnActionText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: '#555',
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 2,
   },
   btnSendText: {
-    color: '#000', // Texto preto no fundo verde
-    fontSize: 16,
-    fontWeight: 'bold',
-  }
+    color: '#00C853',
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 2,
+  },
 });

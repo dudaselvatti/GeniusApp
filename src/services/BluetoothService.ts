@@ -74,6 +74,7 @@ class BluetoothService {
         connectorType: 'rfcomm', // Padrão para HC-05
         DELIMITER: '\n', // Importantíssimo! Diz à biblioteca para ler até a quebra de linha
         DEVICE_CHARSET: 'utf-8',
+        secure: false, // Fundamental para o HC-05 não derrubar a conexão no write
       });
 
       if (isConnected) {
@@ -191,12 +192,14 @@ class BluetoothService {
       if (parts.length === 3) {
         const dificuldadePlaca = parts[1];
         const statusPlaca = parts[2] as 'VITORIA' | 'DERROTA';
-        
-        // Pega o nome digitado no input do app. Se estiver vazio, salva como 'Visitante'
+
         const nomeAtual = store.playerName.trim() !== '' ? store.playerName : 'Visitante';
         const roundAtual = store.currentRound.toString();
 
-        // Envia para o banco de dados (Firebase)
+        // Libera o modo host para nova sequência
+        store.setGameActive(false);
+
+        // Salva o resultado no Firebase
         StorageService.saveResult({
           playerName: nomeAtual,
           difficulty: dificuldadePlaca,
@@ -204,7 +207,7 @@ class BluetoothService {
           status: statusPlaca,
         });
 
-        console.log('Partida salva na nuvem via Bluetooth!');
+        console.log('Partida finalizada. Host liberado para nova sequência.');
       }
     }
     // Regra: $ERRO:MOTIVO

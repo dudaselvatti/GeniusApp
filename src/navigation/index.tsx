@@ -13,19 +13,20 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export function Routes() {
   return (
     <NavigationContainer>
-      <Stack.Navigator 
+      <Stack.Navigator
         initialRouteName="Dashboard"
         screenOptions={{
-          headerStyle: { backgroundColor: '#121212' },
-          headerTintColor: '#00E676',
-          headerTitleStyle: { fontWeight: 'bold' },
-          contentStyle: { backgroundColor: '#121212' },
+          headerStyle: { backgroundColor: '#0A0A0F' },
+          headerTintColor: '#FFFFFF',
+          headerTitleStyle: { fontWeight: '900', fontSize: 14 },
+          headerShadowVisible: false,
+          contentStyle: { backgroundColor: '#0A0A0F' },
         }}
       >
-        <Stack.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Painel de Controle' }} />
+        <Stack.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'IFSP - GUARULHOS' }} />
         <Stack.Screen name="Host" component={HostScreen} options={{ title: 'Modo Host' }} />
         <Stack.Screen name="Ranking" component={RankingScreen} options={{ title: 'Ranking / Histórico' }} />
-        <Stack.Screen name="Bluetooth" component={BluetoothScreen} options={{ title: 'Conectar STM32' }} />
+        <Stack.Screen name="Bluetooth" component={BluetoothScreen} options={{ title: 'Conexão STM32' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

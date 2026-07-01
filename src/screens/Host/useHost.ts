@@ -1,52 +1,69 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import { btService } from '../../services/BluetoothService';
+import { useGameStore } from '../../store/gameStore';
 
 export function useHost() {
-  // Estado local para guardar a sequência de IDs de cores (ex: [1, 4, 2, 3])
   const [sequence, setSequence] = useState<number[]>([]);
+  const [isSending, setIsSending] = useState(false);
+  const { gameActive, setGameActive } = useGameStore();
 
-  // Função para adicionar uma cor à sequência
+  // Bloqueado se já enviou uma sequência e o jogo não terminou
+  const isLocked = gameActive;
+
   const handleAddColor = (colorId: number) => {
-    // Limite opcional: impedir que a sequência fique gigante (ex: max 20)
+    if (isSending || isLocked) return;
     if (sequence.length >= 20) {
-      Alert.alert('Limite atingido', 'A sequência máxima é de 20 cores.');
+      Alert.alert('Limite Atingido', 'A sequência máxima é de 20 cores.');
       return;
     }
     setSequence((prev) => [...prev, colorId]);
   };
 
-  // Função para limpar a sequência atual
   const handleClearSequence = () => {
+    if (isSending || isLocked) return;
     setSequence([]);
   };
 
-  // Função que "enviaria" os dados para o Bluetooth
-  const handleSendToSTM32 = async() => {
+  const handleSendToSTM32 = async () => {
+    if (isSending || isLocked) return;
+
     if (sequence.length === 0) {
-      Alert.alert('Aviso', 'Crie uma sequência antes de enviar.');
+      Alert.alert('Sequência Vazia', 'Toque nas cores para criar a sequência antes de enviar.');
       return;
     }
 
-    // Monta a string no formato exigido: $SEQ:C1,C2,C3
-    const sequenceString = sequence.join(',');
-    const commandToSend = `$SEQ:${sequenceString}`;
+    setIsSending(true);
+    try {
+      const sequenceString = sequence.join(',');
+      const commandToSend = `$SEQ:${sequenceString}`;
 
-    // Aqui, no futuro, chamaremos a função de write do BluetoothService
-    // Envia os dois comandos. O await garante a ordem.
-    const successHost = await btService.sendData('$HOST_MODE');
-    const successSeq = await btService.sendData(commandToSend);
+      const successHost = await btService.sendData('$HOST_MODE');
 
-    if (successHost && successSeq) {
-        Alert.alert('Sucesso', 'Sequência enviada para a placa!');
-        handleClearSequence(); // Limpa a tela se deu tudo certo
-    } else {
-        Alert.alert('Erro', 'Falha ao enviar. Verifique a conexão Bluetooth.');
+      // Aguarda a STM32 processar o $HOST_MODE antes de enviar a sequência
+      await new Promise<void>(resolve => setTimeout(resolve, 250));
+
+      const successSeq = await btService.sendData(commandToSend);
+
+      if (successHost && successSeq) {
+        // Marca o jogo como ativo — bloqueia novas sequências até o resultado chegar
+        setGameActive(true);
+        setSequence([]);
+        Alert.alert('✓ Enviado!', 'Sequência enviada! Aguardando o jogador terminar a partida.');
+      } else {
+        Alert.alert('Falha no Envio', 'Um ou mais comandos não foram confirmados. Verifique a conexão Bluetooth e tente novamente.');
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Ocorreu um erro inesperado ao enviar para a placa.');
+    } finally {
+      setIsSending(false);
     }
   };
 
   return {
     sequence,
+    isSending,
+    isLocked,
     handleAddColor,
     handleClearSequence,
     handleSendToSTM32,

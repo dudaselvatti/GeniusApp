@@ -1,60 +1,106 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './styles';
 import { useBluetooth } from './useBluetooth';
-import { BluetoothDevice } from 'react-native-bluetooth-classic';
 
 export function BluetoothScreen() {
-  const { devices, isScanning, isConnected, scanDevices, handleConnect, handleDisconnect } = useBluetooth();
+  const {
+    targetDevice,
+    isScanning,
+    isConnecting,
+    isDisconnecting,
+    isConnected,
+    scanDevices,
+    handleConnect,
+    handleDisconnect,
+  } = useBluetooth();
 
-  const renderDevice = ({ item }: { item: BluetoothDevice }) => (
-    <View style={styles.deviceCard}>
-      <View>
-        <Text style={styles.deviceName}>{item.name || 'Dispositivo Desconhecido'}</Text>
-        <Text style={styles.deviceAddress}>{item.address}</Text>
-      </View>
-      
-      <TouchableOpacity 
-        style={styles.connectButton}
-        onPress={() => handleConnect(item)}
-      >
-        <Text style={styles.connectButtonText}>Conectar</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  const isBusy = isScanning || isConnecting || isDisconnecting;
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <Text style={styles.title}>Conexão Bluetooth</Text>
-      
-      <Text style={styles.statusText}>
-        Status: {isConnected ? '🟢 Conectado à STM32' : '🔴 Desconectado'}
-      </Text>
+      <Text style={styles.title}>BLUETOOTH</Text>
+      <Text style={styles.subtitle}>CONEXÃO STM32</Text>
 
-      {isScanning ? (
-        <ActivityIndicator size="large" color="#00E676" style={{ marginVertical: 20 }} />
-      ) : (
-        <FlatList
-          data={devices}
-          keyExtractor={(item) => item.address}
-          renderItem={renderDevice}
-          contentContainerStyle={styles.listContent}
-          ListEmptyComponent={
-            <Text style={{ color: '#555', textAlign: 'center' }}>Nenhum dispositivo pareado encontrado.</Text>
-          }
-        />
-      )}
+      {/* Status badge */}
+      <View style={[styles.statusBadge, { borderColor: isConnected ? '#00C85322' : '#FF174422' }]}>
+        <View style={[styles.statusDot, { backgroundColor: isConnected ? '#00C853' : '#FF1744' }]} />
+        <Text style={[styles.statusText, { color: isConnected ? '#00C853' : '#FF1744' }]}>
+          {isConnected ? 'CONECTADO' : 'DESCONECTADO'}
+        </Text>
+      </View>
 
-      {isConnected && (
-        <TouchableOpacity style={[styles.btnScan, { backgroundColor: '#FF1744' }]} onPress={handleDisconnect}>
-          <Text style={styles.btnScanText}>Desconectar</Text>
+      {/* Área central — dispositivo único */}
+      <View style={styles.deviceArea}>
+        {isScanning ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#00C853" />
+            <Text style={styles.loadingText}>Buscando módulo STM32...</Text>
+          </View>
+        ) : targetDevice ? (
+          /* Dispositivo encontrado */
+          <View style={styles.deviceCard}>
+            <View style={styles.deviceIconCircle}>
+              <Text style={styles.deviceIcon}>⬡</Text>
+            </View>
+            <Text style={styles.deviceName}>{targetDevice.name || 'Módulo STM32'}</Text>
+            <Text style={styles.deviceAddress}>{targetDevice.address}</Text>
+
+            {isConnected ? (
+              <View style={styles.connectedBadge}>
+                <View style={styles.connectedDot} />
+                <Text style={styles.connectedText}>Conectado</Text>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={[styles.connectButton, isBusy && { opacity: 0.5 }]}
+                onPress={handleConnect}
+                disabled={isBusy}
+              >
+                {isConnecting ? (
+                  <ActivityIndicator size="small" color="#00C853" />
+                ) : (
+                  <Text style={styles.connectButtonText}>CONECTAR</Text>
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+        ) : (
+          /* Nenhum dispositivo encontrado */
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyIcon}>⬡</Text>
+            <Text style={styles.emptyText}>Nenhum módulo encontrado</Text>
+            <Text style={styles.emptyHint}>
+              Pareie o HC-05 nas configurações{'\n'}de Bluetooth do celular
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Rodapé */}
+      <View style={styles.footerContainer}>
+        {isConnected && (
+          <TouchableOpacity
+            style={[styles.btnDisconnect, isBusy && { opacity: 0.4 }]}
+            onPress={handleDisconnect}
+            disabled={isBusy}
+          >
+            {isDisconnecting ? (
+              <ActivityIndicator size="small" color="#FF1744" />
+            ) : (
+              <Text style={styles.btnDisconnectText}>✕  DESCONECTAR</Text>
+            )}
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity
+          style={[styles.btnScan, isBusy && { opacity: 0.4 }]}
+          onPress={scanDevices}
+          disabled={isBusy}
+        >
+          <Text style={styles.btnScanText}>↺  BUSCAR NOVAMENTE</Text>
         </TouchableOpacity>
-      )}
-
-      <TouchableOpacity style={styles.btnScan} onPress={scanDevices}>
-        <Text style={styles.btnScanText}>Atualizar Lista</Text>
-      </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
