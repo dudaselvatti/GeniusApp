@@ -4,6 +4,7 @@ import RNBluetoothClassic, {
   BluetoothEventSubscription,
 } from 'react-native-bluetooth-classic';
 import { useGameStore } from '../store/gameStore';
+import { StorageService } from './storage'; // Importante: Adicionamos o serviço de Storage aqui!
 
 class BluetoothService {
   private connectedDevice: BluetoothDevice | null = null;
@@ -50,7 +51,7 @@ class BluetoothService {
     }
   }
 
-  // 2. Listar os dispositivos que já estão pareados no celular (o HC-05 deve estar pareado no Android antes de abrir o app)
+  // 2. Listar os dispositivos que já estão pareados no celular
   async getPairedDevices(): Promise<BluetoothDevice[]> {
     try {
       return await RNBluetoothClassic.getBondedDevices();
@@ -183,18 +184,32 @@ class BluetoothService {
         }
       }
     }
-    // Regra: $NOME:NOME_JOGADOR
-    else if (command.startsWith('$NOME:')) {
-       const parts = command.split(':');
-       if(parts.length > 1) {
-           store.setPlayerName(parts[1]);
-       }
+    // Regra: $RESULTADO:NIVEL:STATUS (O nome agora é o app quem define)
+    else if (command.startsWith('$RESULTADO:')) {
+      // Exemplo de como a placa deve enviar: $RESULTADO:DIFICIL:VITORIA
+      const parts = command.split(':');
+      if (parts.length === 3) {
+        const dificuldadePlaca = parts[1];
+        const statusPlaca = parts[2] as 'VITORIA' | 'DERROTA';
+        
+        // Pega o nome digitado no input do app. Se estiver vazio, salva como 'Visitante'
+        const nomeAtual = store.playerName.trim() !== '' ? store.playerName : 'Visitante';
+        const roundAtual = store.currentRound.toString();
+
+        // Envia para o banco de dados (Firebase)
+        StorageService.saveResult({
+          playerName: nomeAtual,
+          difficulty: dificuldadePlaca,
+          round: roundAtual,
+          status: statusPlaca,
+        });
+
+        console.log('Partida salva na nuvem via Bluetooth!');
+      }
     }
-    // Regra: $RESULTADO:NOME:NIVEL:STATUS ou $ERRO:MOTIVO
-    else if (command.startsWith('$RESULTADO:') || command.startsWith('$ERRO:')) {
-      // Aqui no futuro vamos chamar a função de salvar no Histórico (AsyncStorage)
-      // Exemplo futuro: saveToRanking(command)
-      console.log('Fim de jogo detectado! Precisa salvar no Ranking.');
+    // Regra: $ERRO:MOTIVO
+    else if (command.startsWith('$ERRO:')) {
+      console.log('Erro recebido da placa:', command);
     }
   }
 }

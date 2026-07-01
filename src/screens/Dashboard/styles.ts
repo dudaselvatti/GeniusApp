@@ -20,5 +20,14 @@ export const styles = StyleSheet.create({
     alignItems: 'center', 
     marginTop: 10 
   },
-  btnText: { color: '#000', fontWeight: 'bold', fontSize: 16 }
+  btnText: { color: '#000', fontWeight: 'bold', fontSize: 16 },
+  input: {
+    color: '#00E676',
+    fontSize: 20,
+    fontWeight: 'bold',
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+    paddingVertical: 5,
+    marginTop: 5,
+  },
 });

@@ -1,18 +1,25 @@
 import React from 'react';
-import { View, Text, Switch, TouchableOpacity } from 'react-native';
+import { View, Text, Switch, TouchableOpacity, TextInput } from 'react-native';
 import { styles } from './styles';
 import { useDashboard } from './useDashboard';
 
 export function DashboardScreen() {
-  const { currentRound, isMuted, playerName, handleToggleMute, goToHost, goToRanking, goToBluetooth } = useDashboard();
+  const { currentRound, isMuted, playerName, setPlayerName, handleToggleMute, goToHost, goToRanking, goToBluetooth } = useDashboard();
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>GENIUS CTRL</Text>
 
       <View style={styles.card}>
-        <Text style={styles.label}>JOGADOR</Text>
-        <Text style={styles.value}>{playerName}</Text>
+        <Text style={styles.label}>JOGADOR (Toque para editar)</Text>
+        <TextInput
+          style={styles.input}
+          value={playerName}
+          onChangeText={setPlayerName}
+          placeholder="Visitante"
+          placeholderTextColor="#555"
+          maxLength={15} // Evita nomes gigantes que quebram o layout
+        />
       </View>
 
       <View style={styles.card}>
