@@ -10,7 +10,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Dashboard'>
 
 export function useDashboard() {
   const navigation = useNavigation<NavigationProp>();
-  const { isMuted, isConnected, toggleMute } = useGameStore();
+  const { isMuted, isConnected, toggleMute, gameActive } = useGameStore();
   const [isMuteLoading, setIsMuteLoading] = useState(false);
 
   const handleToggleMute = async () => {
@@ -34,6 +34,7 @@ export function useDashboard() {
     isMuted,
     isMuteLoading,
     isConnected,
+    gameActive,
     handleToggleMute,
     goToHost: () => navigation.navigate('Host'),
     goToRanking: () => navigation.navigate('Ranking'),

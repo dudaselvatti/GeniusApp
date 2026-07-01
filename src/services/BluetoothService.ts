@@ -1,4 +1,4 @@
-import { PermissionsAndroid, Platform } from 'react-native';
+import { PermissionsAndroid, Platform, Alert } from 'react-native';
 import RNBluetoothClassic, {
   BluetoothDevice,
   BluetoothEventSubscription,
@@ -184,6 +184,7 @@ class BluetoothService {
         const round = parseInt(parts[1], 10);
         if (!isNaN(round)) {
           store.setCurrentRound(round);
+          store.setGameActive(true); // Marca que o jogo está rolando na placa
         }
       }
     }

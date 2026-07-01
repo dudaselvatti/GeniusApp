@@ -8,6 +8,7 @@ export function DashboardScreen() {
     isMuted,
     isMuteLoading,
     isConnected,
+    gameActive,
     handleToggleMute,
     goToHost,
     goToRanking,
@@ -84,8 +85,8 @@ export function DashboardScreen() {
           <Text style={styles.btnTextHistory}>◈  VER HISTÓRICO</Text>
         </TouchableOpacity>
 
-        {/* Modo Host — clicável só se conectado */}
-        {isConnected ? (
+        {/* Modo Host — clicável só se conectado e não estiver jogando */}
+        {isConnected && !gameActive ? (
           <TouchableOpacity
             style={[styles.btnPrimary, styles.btnHost, styles.btnHostEnabled]}
             onPress={goToHost}
@@ -96,7 +97,9 @@ export function DashboardScreen() {
         ) : (
           <View style={[styles.btnPrimary, styles.btnHost, styles.btnHostDisabled]}>
             <Text style={[styles.btnTextHost, styles.btnTextHostDisabled]}>▶  MODO HOST</Text>
-            <Text style={[styles.btnSubText, styles.btnSubDisabled]}>Conecte o Bluetooth para continuar</Text>
+            <Text style={[styles.btnSubText, styles.btnSubDisabled]}>
+              {!isConnected ? 'Conecte o Bluetooth para continuar' : 'Partida em andamento...'}
+            </Text>
           </View>
         )}
       </View>
