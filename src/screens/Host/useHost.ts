@@ -53,7 +53,7 @@ export function useHost() {
       } else {
         Alert.alert('Falha no Envio', 'Um ou mais comandos não foram confirmados. Verifique a conexão Bluetooth e tente novamente.');
       }
-    } catch (error) {
+    } catch {
       Alert.alert('Erro', 'Ocorreu um erro inesperado ao enviar para a placa.');
     } finally {
       setIsSending(false);

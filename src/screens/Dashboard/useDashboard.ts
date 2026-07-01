@@ -23,7 +23,7 @@ export function useDashboard() {
     try {
       await btService.sendData(command);
       toggleMute();
-    } catch (error) {
+    } catch {
       Alert.alert('Erro', 'Não foi possível enviar o comando de som. Verifique a conexão Bluetooth.');
     } finally {
       setIsMuteLoading(false);

@@ -16,7 +16,7 @@ export function useRanking() {
     try {
       const data = await StorageService.getResults();
       setResults(data);
-    } catch (error) {
+    } catch {
       Alert.alert('Erro', 'Não foi possível carregar o histórico.');
     }
   };
@@ -24,7 +24,7 @@ export function useRanking() {
   useFocusEffect(
     useCallback(() => {
       loadRanking();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+       
     }, [])
   );
 
@@ -61,7 +61,7 @@ export function useRanking() {
     try {
       await StorageService.seedExamples();
       await loadRanking();
-    } catch (error) {
+    } catch {
       Alert.alert('Erro', 'Não foi possível criar os exemplos.');
     } finally {
       setIsLoading(false);
@@ -85,7 +85,7 @@ export function useRanking() {
             try {
               await StorageService.clearResults();
               setResults([]);
-            } catch (error) {
+            } catch {
               Alert.alert('Erro', 'Não foi possível limpar o histórico.');
             } finally {
               setIsClearing(false);

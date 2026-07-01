@@ -53,7 +53,7 @@ export function useBluetooth() {
           'Nenhum módulo STM32/HC-05 encontrado entre os dispositivos pareados. Pareie o módulo nas configurações do celular primeiro.'
         );
       }
-    } catch (error) {
+    } catch {
       Alert.alert('Erro', 'Ocorreu um problema ao buscar dispositivos Bluetooth.');
     } finally {
       isScanningRef.current = false;
@@ -64,7 +64,7 @@ export function useBluetooth() {
   useFocusEffect(
     useCallback(() => {
       scanDevices();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+       
     }, [])
   );
 
@@ -82,7 +82,7 @@ export function useBluetooth() {
           `Não foi possível conectar a ${targetDevice.name}. Verifique se o dispositivo está ligado e próximo.`
         );
       }
-    } catch (error) {
+    } catch {
       Alert.alert('Erro', `Erro inesperado ao conectar a ${targetDevice.name}.`);
     } finally {
       setIsConnecting(false);
@@ -96,7 +96,7 @@ export function useBluetooth() {
     try {
       await btService.disconnect();
       Alert.alert('Desconectado', 'A conexão com a placa foi encerrada.');
-    } catch (error) {
+    } catch {
       Alert.alert('Erro', 'Ocorreu um problema ao encerrar a conexão.');
     } finally {
       setIsDisconnecting(false);

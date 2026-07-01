@@ -71,10 +71,11 @@ class BluetoothService {
 
       console.log(`Tentando conectar a: ${device.name}...`);
       const isConnected = await device.connect({
-        connectorType: 'rfcomm', // Padrão para HC-05
-        DELIMITER: '\n', // Importantíssimo! Diz à biblioteca para ler até a quebra de linha
+        connectorType: 'rfcomm',
         DEVICE_CHARSET: 'utf-8',
-        secure: false, // Fundamental para o HC-05 não derrubar a conexão no write
+        secure: false,
+        // Sem DELIMITER: o app faz o split por \n manualmente no handleIncomingData.
+        // Com DELIMITER a biblioteca remove o \n e o handler nunca processa os dados.
       });
 
       if (isConnected) {
@@ -146,26 +147,27 @@ class BluetoothService {
 
   // 7. O "Coração" do Protocolo - Interpretando o que a STM32 fala
   private handleIncomingData(data: string) {
-    // Adiciona o pedaço recebido ao buffer
     this.dataBuffer += data;
 
-    // O HC-05 pode mandar os dados "picotados". 
-    // Nós só processamos quando encontramos a quebra de linha (\n)
-    if (this.dataBuffer.includes('\n')) {
-      // Divide o buffer pelas quebras de linha (pode ter vindo mais de um comando rápido)
-      const commands = this.dataBuffer.split('\n');
-      
-      // O último elemento da array geralmente é vazio ou incompleto (sem \n), 
-      // então nós o guardamos no buffer para a próxima leitura.
-      this.dataBuffer = commands.pop() || '';
+    // Divide por \n — funciona tanto quando a biblioteca entrega com \n
+    // quanto quando o STM32 envia \n explicitamente.
+    const lines = this.dataBuffer.split('\n');
 
-      // Processa os comandos completos
-      commands.forEach(command => {
-        const cleanCmd = command.trim();
-        if (cleanCmd) {
-          this.parseProtocol(cleanCmd);
-        }
-      });
+    // O último elemento é o fragmento incompleto (sem \n ainda) — guarda no buffer.
+    this.dataBuffer = lines.pop() ?? '';
+
+    // Processa todas as linhas completas
+    lines.forEach(line => {
+      const cmd = line.trim();
+      if (cmd) this.parseProtocol(cmd);
+    });
+
+    // Se o buffer acumulou um comando completo mas sem \n
+    // (acontece quando DELIMITER strippou o \n antes de entregar)
+    const buffered = this.dataBuffer.trim();
+    if (buffered.startsWith('$')) {
+      this.dataBuffer = '';
+      this.parseProtocol(buffered);
     }
   }
 
@@ -190,8 +192,13 @@ class BluetoothService {
       // Exemplo de como a placa deve enviar: $RESULTADO:DIFICIL:VITORIA
       const parts = command.split(':');
       if (parts.length === 3) {
-        const dificuldadePlaca = parts[1];
+        let dificuldadePlaca = parts[1];
         const statusPlaca = parts[2] as 'VITORIA' | 'DERROTA';
+
+        // Se houver uma partida Host em andamento, forçamos a dificuldade
+        if (store.gameActive) {
+          dificuldadePlaca = 'PERSONALIZADA';
+        }
 
         const nomeAtual = store.playerName.trim() !== '' ? store.playerName : 'Visitante';
         const roundAtual = store.currentRound.toString();
